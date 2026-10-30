@@ -1,31 +1,69 @@
-import { stations } from "../data/store.js"
-import { createIncident } from "./incidentServices.js"
 
-function simulateStations() {
+import { stations } from "../data/store.js";
+import { createIncident } from "./incidentServices.js";
 
+let isRunning = false;
 
-    for (const station of stations) {
-        if (station.status !== "AVAILABLE" && station.status !== "CHARGING") {
-            continue;
-        }
-        const random = Math.random();
-        if (random < 0.02) {
-            station.status = "FAULT",
-                station.faultAt = Date.now(),
+async function simulateStations() {
+
+    if (isRunning) return;
+
+    isRunning = true;
+
+    try {
+        for (const station of stations) {
+
+            if (
+                station.status !== "AVAILABLE" &&
+                station.status !== "CHARGING"
+            ) {
+                continue;
+            }
+
+            const random = Math.random();
+
+            if (random < 0.04) {
+
+                station.status = "FAULT";
+                station.faultAt = Date.now();
                 station.resetAttempts = 0;
-            createIncident(station);
-            console.log(`${station.id} developed a fault`);
+
+                // Save the new incident in PostgreSQL.
+                await createIncident(station);
+
+                console.log(`${station.id} developed a fault`);
+
+            } else if (
+                station.status === "AVAILABLE" &&
+                random < 0.04
+            ) {
+
+                station.status = "CHARGING";
+
+                console.log(`${station.id} is now CHARGING`);
+
+            } else if (
+                station.status === "CHARGING" &&
+                random < 0.03
+            ) {
+
+                station.status = "AVAILABLE";
+
+                console.log(`${station.id} is now AVAILABLE`);
+            }
         }
-        else if (station.status == "AVAILABLE" && random < 0.04) {
-            station.status = "CHARGING";
-            console.log(`${station.id} is now CHARGING`);
-        } else if (station.status=="CHARGING" && random<0.03) {
-                    station.status = "AVAILABLE";
-                 console.log(`${station.id} is now AVAILABLE`);
-        }
+
+    } catch (error) {
+        console.error("Station simulator error:", error);
+
+    } finally {
+        isRunning = false;
     }
 }
-export function startStationSimulator(){
-    console.log('station simulator started');
-    setInterval(simulateStations,5000);  
+
+export function startStationSimulator() {
+
+    console.log("Station simulator started");
+
+    setInterval(simulateStations, 5000);
 }
