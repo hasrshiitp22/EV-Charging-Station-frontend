@@ -1,37 +1,33 @@
 
-import Database from "better-sqlite3";
-import fs from "node:fs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
+import "dotenv/config";
+import pg from "pg";
 
-const filename = fileURLToPath(import.meta.url);
-const dirname = path.dirname(filename);
+const { Pool } = pg;
 
+const db = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
 
-const dataDirectory = path.resolve(dirname, "../../data");
-fs.mkdirSync(dataDirectory, { recursive: true });
+try {
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS incidents (
+            id SERIAL PRIMARY KEY,
+            "stationId" TEXT NOT NULL,
+            "faultAt" TEXT NOT NULL,
+            "recoveredAt" TEXT,
+            "recoverySeconds" DOUBLE PRECISION,
+            "resetAttempts" INTEGER NOT NULL DEFAULT 0,
+            result TEXT NOT NULL DEFAULT 'PENDING'
+        );
+    `);
 
-
-const databasePath = path.join(
-    dataDirectory,
-    "ev_charging.db"
-);
-
-const db = new Database(databasePath);
-
-
-db.exec(`
-    CREATE TABLE IF NOT EXISTS incidents (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        stationId TEXT NOT NULL,
-        faultAt TEXT NOT NULL,
-        recoveredAt TEXT,
-        recoverySeconds REAL,
-        resetAttempts INTEGER NOT NULL DEFAULT 0,
-        result TEXT NOT NULL DEFAULT 'PENDING'
-    );
-`);
-
-console.log("SQLite database connected");
+    console.log("PostgreSQL connected successfully");
+} catch (error) {
+    console.error("Database connection failed:", error);
+    process.exit(1);
+}
 
 export default db;
