@@ -4,14 +4,15 @@ import stationRoutes from "./routes/stationRoute.js";
 import incidentsRoutes from "./routes/incidentRoutes.js"
 const app=express();
 
-app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://ev-charging-station-frontend.vercel.app/"
-  ],
-}));
+const allowedOrigins = [
+    "https://ev-charging-station-frontend.vercel.app"
+];
 
+app.use(cors({
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+}));
 app.use(express.json())
 
 app.use("/api/stations",stationRoutes);
