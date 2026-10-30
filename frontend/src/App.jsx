@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import "./App.css";
 
-const API_URL ="http://localhost:5000/api";
+const API_URL ="https://ev-charging-station-frontend-e7xo.vercel.app/api";
 
 function formatDate(value) {
   if (!value) return "—";
