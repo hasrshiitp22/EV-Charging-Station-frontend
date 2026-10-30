@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
   Activity,
@@ -81,16 +80,17 @@ function App() {
     return () => clearInterval(timer);
   }, []);
 
-  const statusCounts = stats?.statusCounts || {};
-  const recoveredCount =
-    stats?.recoveredIncidents ??
-    incidents.filter((item) => item.result === "RECOVERED").length;
+const statusCounts = stats?.statusCounts || {};
 
-const completedIncidents = incidents.filter(
-  (incident) =>
-    incident.result === "RECOVERED" ||
-    incident.result === "NEEDS_TECHNICIAN"
+const recoveredCount = incidents.filter(
+  (item) => item.result === "RECOVERED"
 ).length;
+
+const failedCount = incidents.filter(
+  (item) => item.result === "NEEDS_TECHNICIAN"
+).length;
+
+const completedIncidents = recoveredCount + failedCount;
 
 const successRate =
   completedIncidents === 0
@@ -99,9 +99,10 @@ const successRate =
 
 const chargingCount = statusCounts.CHARGING ?? 0;
 const maintenanceCount = statusCounts.MAINTENANCE ?? 0;
-const pendingCount =
-  stats?.pendingIncidents ??
-  incidents.filter((incident) => incident.result === "PENDING").length;
+
+const pendingCount = incidents.filter(
+  (item) => item.result === "PENDING"
+).length;
 
   const cards = [
     {
@@ -253,7 +254,7 @@ const pendingCount =
             <div className="section-heading">
               <div>
                 <h2>Incident History</h2>
-                <p>Faults and recovery results saved in SQLite</p>
+                <p>Faults and recovery results saved in PostgreSQL</p>
               </div>
               <span className="count-label">
                 {incidents.length} incidents
