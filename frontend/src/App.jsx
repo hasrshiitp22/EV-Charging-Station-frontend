@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import "./App.css";
 
-const API_URL ="https://ev-charging-station-frontend-e7xo.vercel.app/api";
+const API_URL ="https://ev-charging-station-reliability-mon.vercel.app/api/stations";
 
 function formatDate(value) {
   if (!value) return "—";
